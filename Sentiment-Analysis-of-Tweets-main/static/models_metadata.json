@@ -1,0 +1,250 @@
+{
+    "best_model": "Logistic Regression",
+    "best_accuracy": 1.0,
+    "models_comparison": {
+        "Logistic Regression": {
+            "accuracy": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1_score": 1.0
+        },
+        "Multinomial Naive Bayes": {
+            "accuracy": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1_score": 1.0
+        },
+        "Decision Tree": {
+            "accuracy": 0.9956140350877193,
+            "precision": 0.996415770609319,
+            "recall": 0.9931972789115647,
+            "f1_score": 0.9947617720813597
+        },
+        "Support Vector Machine": {
+            "accuracy": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1_score": 1.0
+        }
+    },
+    "confusion_matrix": {
+        "labels": [
+            "Negative",
+            "Neutral",
+            "Positive"
+        ],
+        "matrix": [
+            [
+                87,
+                0,
+                0
+            ],
+            [
+                0,
+                49,
+                0
+            ],
+            [
+                0,
+                0,
+                92
+            ]
+        ]
+    },
+    "top_words": {
+        "Positive": [
+            {
+                "word": "new",
+                "count": 111
+            },
+            {
+                "word": "happy",
+                "count": 83
+            },
+            {
+                "word": "highly",
+                "count": 81
+            },
+            {
+                "word": "amazing",
+                "count": 80
+            },
+            {
+                "word": "absolutely",
+                "count": 80
+            },
+            {
+                "word": "perfect",
+                "count": 76
+            },
+            {
+                "word": "customer",
+                "count": 74
+            },
+            {
+                "word": "recommend",
+                "count": 58
+            },
+            {
+                "word": "good",
+                "count": 56
+            },
+            {
+                "word": "life",
+                "count": 56
+            },
+            {
+                "word": "performance",
+                "count": 54
+            },
+            {
+                "word": "fast",
+                "count": 47
+            },
+            {
+                "word": "great",
+                "count": 45
+            },
+            {
+                "word": "feeling",
+                "count": 45
+            },
+            {
+                "word": "service",
+                "count": 43
+            }
+        ],
+        "Negative": [
+            {
+                "word": "terrible",
+                "count": 123
+            },
+            {
+                "word": "worst",
+                "count": 106
+            },
+            {
+                "word": "hate",
+                "count": 90
+            },
+            {
+                "word": "extremely",
+                "count": 77
+            },
+            {
+                "word": "new",
+                "count": 74
+            },
+            {
+                "word": "feel",
+                "count": 72
+            },
+            {
+                "word": "service",
+                "count": 65
+            },
+            {
+                "word": "customer",
+                "count": 65
+            },
+            {
+                "word": "support",
+                "count": 65
+            },
+            {
+                "word": "quality",
+                "count": 62
+            },
+            {
+                "word": "experience",
+                "count": 59
+            },
+            {
+                "word": "disappointed",
+                "count": 58
+            },
+            {
+                "word": "frustrating",
+                "count": 55
+            },
+            {
+                "word": "hotel",
+                "count": 54
+            },
+            {
+                "word": "keyboard",
+                "count": 53
+            }
+        ],
+        "Neutral": [
+            {
+                "word": "new",
+                "count": 94
+            },
+            {
+                "word": "today",
+                "count": 89
+            },
+            {
+                "word": "normal",
+                "count": 55
+            },
+            {
+                "word": "average",
+                "count": 43
+            },
+            {
+                "word": "watching",
+                "count": 35
+            },
+            {
+                "word": "documentary",
+                "count": 35
+            },
+            {
+                "word": "netflix",
+                "count": 35
+            },
+            {
+                "word": "tonight",
+                "count": 35
+            },
+            {
+                "word": "restaurant",
+                "count": 35
+            },
+            {
+                "word": "nothing",
+                "count": 34
+            },
+            {
+                "word": "raining",
+                "count": 31
+            },
+            {
+                "word": "rainy",
+                "count": 31
+            },
+            {
+                "word": "day",
+                "count": 31
+            },
+            {
+                "word": "bad",
+                "count": 30
+            },
+            {
+                "word": "wasnt",
+                "count": 30
+            }
+        ]
+    },
+    "dataset_stats": {
+        "total_tweets": 1140,
+        "distribution": {
+            "Positive": 458,
+            "Negative": 437,
+            "Neutral": 245
+        }
+    }
+}

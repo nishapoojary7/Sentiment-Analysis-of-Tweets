@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentiment Result</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .result-container {
+            max-width: 600px;
+            margin: 10vh auto;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="background-glow">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+    </div>
+
+    <div class="app-container result-container">
+        <header style="justify-content: center; margin-bottom: 2rem;">
+            <div class="logo">
+                <i class="fa-brands fa-x-twitter logo-icon"></i>
+                <div class="logo-text">
+                    <h1>SentiTweet</h1>
+                    <p>Analysis Result</p>
+                </div>
+            </div>
+        </header>
+
+        <div class="glass-card">
+            <h2 class="chart-title" style="margin-bottom: 2rem; font-size: 1.4rem;">Analysis Result</h2>
+            
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 1.5rem; margin-bottom: 2rem;">
+                {% if sentiment == 'Positive' %}
+                    <div class="sentiment-emoji positive" style="font-size: 6rem; animation: float 3s ease-in-out infinite;">😊</div>
+                    <div class="sentiment-label-text" style="color: var(--color-positive); font-size: 2.2rem;">{{ sentiment }}</div>
+                {% elif sentiment == 'Neutral' %}
+                    <div class="sentiment-emoji neutral" style="font-size: 6rem; animation: float 3s ease-in-out infinite;">😐</div>
+                    <div class="sentiment-label-text" style="color: var(--color-neutral); font-size: 2.2rem;">{{ sentiment }}</div>
+                {% else %}
+                    <div class="sentiment-emoji negative" style="font-size: 6rem; animation: float 3s ease-in-out infinite;">😞</div>
+                    <div class="sentiment-label-text" style="color: var(--color-negative); font-size: 2.2rem;">{{ sentiment }}</div>
+                {% endif %}
+                
+                <div style="font-size: 1.1rem; color: var(--text-secondary);">
+                    Confidence Score: <strong>{{ confidence }}%</strong>
+                </div>
+            </div>
+
+            <div class="preprocessed-box" style="text-align: left; margin-bottom: 2rem;">
+                <p>Original Tweet</p>
+                <div style="font-style: italic; color: var(--text-primary); margin-bottom: 1rem; word-break: break-all;">
+                    "{{ original_text }}"
+                </div>
+                <p>Preprocessed Tokens</p>
+                <code>{{ clean_text }}</code>
+            </div>
+
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+                <a href="/" class="btn" style="text-decoration: none;">
+                    <i class="fas fa-arrow-left"></i> Analyze Another
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tweet Sentiment Analysis Dashboard</title>
+    <!-- FontAwesome for Premium Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js for Animated Visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom Style Sheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- Background glowing decorations -->
+    <div class="background-glow">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="app-container">
+        <!-- Dashboard Navigation Header -->
+        <header>
+            <div class="logo">
+                <i class="fa-brands fa-x-twitter logo-icon"></i>
+                <div class="logo-text">
+                    <h1>SentiTweet</h1>
+                    <p>Tweet Sentiment Analyzer Dashboard</p>
+                </div>
+            </div>
+            
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="analyzer">
+                    <i class="fas fa-magic"></i> Analyze Tweet
+                </button>
+                <button class="tab-btn" data-tab="batch">
+                    <i class="fas fa-file-csv"></i> Batch CSV
+                </button>
+                <button class="tab-btn" data-tab="dashboard">
+                    <i class="fas fa-chart-line"></i> Dashboard
+                </button>
+                <button class="tab-btn" data-tab="history">
+                    <i class="fas fa-history"></i> History Log
+                </button>
+            </div>
+
+            <div class="system-badge" id="modelNameBadge">
+                Model: Loading...
+            </div>
+        </header>
+
+        <!-- 1. Analyzer View Panel -->
+        <div class="view-panel active" id="analyzerPanel">
+            <div class="layout-grid">
+                <!-- Left Input Glass Card -->
+                <div class="glass-card">
+                    <h2 class="chart-title" style="margin-bottom: 1.5rem; font-size: 1.4rem;">
+                        <i class="fas fa-keyboard" style="color: var(--color-cyan);"></i> Enter Tweet for Analysis
+                    </h2>
+                    <form id="tweetForm">
+                        <div class="form-group">
+                            <label for="tweetText">What's on your mind? (Or paste a tweet)</label>
+                            <textarea id="tweetText" name="tweet" rows="6" maxlength="280" placeholder="Type a tweet e.g. @Apple I absolutely love the new battery updates! 😍 #happy..."></textarea>
+                            <div class="char-counter" id="charCount">0 characters</div>
+                        </div>
+                        <button type="submit" class="btn" style="margin-top: 1rem; align-self: flex-start;">
+                            <i class="fas fa-brain"></i> Analyze Sentiment
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Right Results Visual Glass Card -->
+                <div class="glass-card" style="display: flex; flex-direction: column;">
+                    <h2 class="chart-title" style="margin-bottom: 1.5rem; font-size: 1.4rem;">
+                        <i class="fas fa-poll" style="color: var(--color-purple);"></i> Sentiment Prediction
+                    </h2>
+                    
+                    <!-- Display Placeholder State when empty -->
+                    <div class="result-panel" id="resultPlaceholder">
+                        <i class="fas fa-arrow-left-long" style="font-size: 2.5rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
+                        <p style="color: var(--text-secondary);">Enter and submit a tweet on the left to see the sentiment analysis results.</p>
+                    </div>
+
+                    <!-- Display Results Panel -->
+                    <div class="result-panel" id="resultPanel" style="display: none;">
+                        <div style="display: flex; align-items: center; gap: 1.5rem; margin-bottom: 1.5rem;">
+                            <div class="sentiment-emoji" id="resultEmoji">😐</div>
+                            <div>
+                                <div class="sentiment-label-text" id="resultSentiment">Neutral</div>
+                                <div class="sentiment-confidence" id="resultConfidence">Confidence: 0.0%</div>
+                            </div>
+                        </div>
+
+                        <!-- Progress Bars breakdown -->
+                        <div class="result-meter-container">
+                            <div class="meter-row">
+                                <div class="meter-label">
+                                    <span style="color: var(--color-positive);"><i class="far fa-smile"></i> Positive Probability</span>
+                                    <span id="posPct" style="color: var(--color-positive);">0.0%</span>
+                                </div>
+                                <div class="meter-bar-outer">
+                                    <div class="meter-bar-inner positive" id="posMeter"></div>
+                                </div>
+                            </div>
+
+                            <div class="meter-row">
+                                <div class="meter-label">
+                                    <span style="color: var(--color-neutral);"><i class="far fa-meh"></i> Neutral Probability</span>
+                                    <span id="neuPct" style="color: var(--color-neutral);">0.0%</span>
+                                </div>
+                                <div class="meter-bar-outer">
+                                    <div class="meter-bar-inner neutral" id="neuMeter"></div>
+                                </div>
+                            </div>
+
+                            <div class="meter-row">
+                                <div class="meter-label">
+                                    <span style="color: var(--color-negative);"><i class="far fa-frown"></i> Negative Probability</span>
+                                    <span id="negPct" style="color: var(--color-negative);">0.0%</span>
+                                </div>
+                                <div class="meter-bar-outer">
+                                    <div class="meter-bar-inner negative" id="negMeter"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Preprocessed code view -->
+                        <div class="preprocessed-box">
+                            <p>Preprocessed Tokens (Input to Classifier)</p>
+                            <code id="cleanTextCode">love new battery update happy</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Batch Processing View Panel -->
+        <div class="view-panel" id="batchPanel">
+            <div class="glass-card">
+                <h2 class="chart-title" style="margin-bottom: 1rem; font-size: 1.4rem;">
+                    <i class="fas fa-file-csv" style="color: var(--color-cyan);"></i> Batch Processing and CSV Analyzer
+                </h2>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem; font-size: 0.95rem;">
+                    Upload a CSV file containing a list of tweets. The columns must include a tweet text column (typically named "Tweet" or "Text"). The system will parse the file, clean the tweets, execute batch classifications, and let you download the annotated results sheet.
+                </p>
+
+                <form id="uploadForm">
+                    <div class="upload-zone" id="uploadZone">
+                        <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                        <p>Drag and drop your tweets CSV file here, or click to browse</p>
+                        <span>Only CSV files supported (.csv)</span>
+                        <input type="file" id="csvFile" name="file" accept=".csv">
+                    </div>
+                    <div style="margin-top: 1.5rem; display: flex; justify-content: flex-end;">
+                        <button type="submit" class="btn">
+                            <i class="fas fa-play"></i> Start Batch Classification
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Dynamic Batch Results Container -->
+            <div id="batchResultSection" style="display: none; margin-top: 2rem;">
+                <!-- Filled in dynamically by JS -->
+            </div>
+        </div>
+
+        <!-- 3. Dashboard Analytics View Panel -->
+        <div class="view-panel" id="dashboardPanel">
+            <!-- Summary Metric Highlights Cards -->
+            <div class="stats-cards-grid">
+                <div class="stat-mini-card">
+                    <div class="stat-icon"><i class="fas fa-database"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-label">Total History</span>
+                        <span class="stat-val" id="totalAnalyzedVal">0</span>
+                    </div>
+                </div>
+                <div class="stat-mini-card">
+                    <div class="stat-icon positive"><i class="far fa-smile"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-label">Positive Logs</span>
+                        <span class="stat-val" id="posVal">0</span>
+                    </div>
+                </div>
+                <div class="stat-mini-card">
+                    <div class="stat-icon neutral"><i class="far fa-meh"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-label">Neutral Logs</span>
+                        <span class="stat-val" id="neuVal">0</span>
+                    </div>
+                </div>
+                <div class="stat-mini-card">
+                    <div class="stat-icon negative"><i class="far fa-frown"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-label">Negative Logs</span>
+                        <span class="stat-val" id="negVal">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard Charts section -->
+            <div class="dashboard-grid">
+                <!-- Donut Chart: Sentiment distribution -->
+                <div class="glass-card chart-card">
+                    <div class="chart-header">
+                        <h3 class="chart-title"><i class="fas fa-chart-pie" style="color: var(--color-cyan);"></i> Database Sentiment Breakdown</h3>
+                    </div>
+                    <div class="chart-content">
+                        <canvas id="sentimentDonutChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Bar Chart: Model Accuracy comparisons -->
+                <div class="glass-card chart-card">
+                    <div class="chart-header">
+                        <h3 class="chart-title"><i class="fas fa-chart-bar" style="color: var(--color-primary);"></i> Classifier Performance Benchmarks</h3>
+                    </div>
+                    <div class="chart-content">
+                        <canvas id="modelComparisonChart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Tag Clouds -->
+                <div class="glass-card chart-card" style="grid-column: span 2; height: auto;">
+                    <div class="chart-header">
+                        <h3 class="chart-title"><i class="fas fa-cloud" style="color: var(--color-purple);"></i> Word Clouds (Training Corpus)</h3>
+                    </div>
+                    <div class="wordcloud-container">
+                        <div class="wordcloud-img-box">
+                            <h4 style="color: var(--color-positive);">Positive Sentiment Cloud</h4>
+                            <img src="{{ url_for('static', filename='images/wordcloud_positive.png') }}" alt="Positive Word Cloud" onerror="this.src='https://placehold.co/400x200/10b981/ffffff?text=Positive+Cloud'">
+                        </div>
+                        <div class="wordcloud-img-box">
+                            <h4 style="color: var(--color-negative);">Negative Sentiment Cloud</h4>
+                            <img src="{{ url_for('static', filename='images/wordcloud_negative.png') }}" alt="Negative Word Cloud" onerror="this.src='https://placehold.co/400x200/f43f5e/ffffff?text=Negative+Cloud'">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Confusion Matrix custom styled grid -->
+                <div class="glass-card chart-card">
+                    <div class="chart-header">
+                        <h3 class="chart-title"><i class="fas fa-border-all" style="color: var(--color-cyan);"></i> Confusion Matrix (Best Model)</h3>
+                    </div>
+                    <div class="chart-content" style="display: block;">
+                        <div class="matrix-container">
+                            <div class="matrix-grid">
+                                <!-- Headers -->
+                                <div class="matrix-cell matrix-header-cell"></div>
+                                <div class="matrix-cell matrix-header-cell">Negative</div>
+                                <div class="matrix-cell matrix-header-cell">Neutral</div>
+                                <div class="matrix-cell matrix-header-cell">Positive</div>
+                                
+                                <!-- Row 0 -->
+                                <div class="matrix-cell matrix-row-label">Negative</div>
+                                <div class="matrix-cell matrix-data-cell" id="cm-0-0">0</div>
+                                <div class="matrix-cell matrix-data-cell" id="cm-0-1">0</div>
+                                <div class="matrix-cell matrix-data-cell" id="cm-0-2">0</div>
+                                
+                                <!-- Row 1 -->
+                                <div class="matrix-cell matrix-row-label">Neutral</div>
+                                <div class="matrix-cell matrix-data-cell" id="cm-1-0">0</div>
+                                <div class="matrix-cell matrix-data-cell" id="cm-1-1">0</div>
+                                <div class="matrix-cell matrix-data-cell" id="cm-1-2">0</div>
+                                
+                                <!-- Row 2 -->
+                                <div class="matrix-cell matrix-row-label">Positive</div>
+                                <div class="matrix-cell matrix-data-cell" id="cm-2-0">0</div>
+                                <div class="matrix-cell matrix-data-cell" id="cm-2-1">0</div>
+                                <div class="matrix-cell matrix-data-cell" id="cm-2-2">0</div>
+                            </div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary); text-align: center; margin-top: 0.5rem; width: 100%;">
+                                Y-axis: Actual Sentiment | X-axis: Predicted Sentiment
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Most common words lists -->
+                <div class="glass-card chart-card">
+                    <div class="chart-header">
+                        <h3 class="chart-title"><i class="fas fa-list-ol" style="color: var(--color-cyan);"></i> Sentiment Vocabulary Frequency</h3>
+                    </div>
+                    <div class="chart-content" style="display: block; overflow-y: auto;">
+                        <div class="words-rank-grid">
+                            <!-- Positives -->
+                            <div class="words-column">
+                                <div class="words-column-title" style="color: var(--color-positive);">
+                                    <i class="far fa-smile"></i> Top Positive Tokens
+                                </div>
+                                <div class="words-list" id="posWordsList">
+                                    <!-- Dynamic -->
+                                </div>
+                            </div>
+                            <!-- Negatives -->
+                            <div class="words-column">
+                                <div class="words-column-title" style="color: var(--color-negative);">
+                                    <i class="far fa-frown"></i> Top Negative Tokens
+                                </div>
+                                <div class="words-list" id="negWordsList">
+                                    <!-- Dynamic -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. History Logs View Panel -->
+        <div class="view-panel" id="historyPanel">
+            <div class="glass-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+                    <h2 class="chart-title" style="font-size: 1.4rem;">
+                        <i class="fas fa-history" style="color: var(--color-cyan);"></i> Prediction History Logs
+                    </h2>
+                    <button class="btn btn-danger" id="clearHistoryBtn">
+                        <i class="far fa-trash-alt"></i> Clear Database Log
+                    </button>
+                </div>
+
+                <!-- Filter Controls Bar -->
+                <div class="filters-bar">
+                    <div class="search-input-wrapper">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchHistory" placeholder="Search original text or tokens...">
+                    </div>
+                    <select id="filterSentiment" class="select-filter">
+                        <option value="">All Sentiments</option>
+                        <option value="Positive">Positive</option>
+                        <option value="Neutral">Neutral</option>
+                        <option value="Negative">Negative</option>
+                    </select>
+                </div>
+
+                <!-- Database Logs table -->
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 20%">Timestamp</th>
+                                <th style="width: 45%">Original Text</th>
+                                <th style="width: 15%">Predicted Sentiment</th>
+                                <th style="width: 10%">Confidence</th>
+                                <th style="width: 10%">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody">
+                            <!-- Filled in dynamically by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Imports -->
+    <script src="{{ url_for('static', filename='js/main.js') }}?v=1.0.3"></script>
+</body>
+</html>
